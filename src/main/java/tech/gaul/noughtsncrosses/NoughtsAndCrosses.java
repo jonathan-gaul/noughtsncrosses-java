@@ -9,8 +9,7 @@ public class NoughtsAndCrosses {
         int turns = grid.simulateGame(Piece.O, (g, turn, piece) -> {
             System.out.println("TURN " + turn + ":");
             System.out.println(grid.toString());
-            System.out.println();
-
+            
             Piece winner = grid.getWinner();
             if (winner != null) {
                 switch (grid.getWinner()) {
