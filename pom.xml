@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>logic</module>
+        <module>api</module>
     </modules>
 
     <properties>
