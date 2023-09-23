@@ -1,32 +1,41 @@
 package tech.gaul.noughtsncrosses;
 
+import tech.gaul.noughtsncrosses.events.GameFinishedEvent;
+import tech.gaul.noughtsncrosses.events.TurnTakenEvent;
+
 public class NoughtsAndCrosses {
 
     public static void main(String[] args) {
 
-        Grid grid = new Grid();
+        Game game = new Game();
 
-        int turns = grid.simulateGame(Piece.O, (g, turn, piece) -> {
-            System.out.println("TURN " + turn + ":");
-            System.out.println(grid.toString());
-            
-            Piece winner = grid.getWinner();
-            if (winner != null) {
-                switch (grid.getWinner()) {
-                    case O:
-                        System.out.println("O wins!!");
-                        break;
-                    case X:
-                        System.out.println("X wins!!");
-                        break;
-                    case EMPTY:
-                        System.out.println("It's a draw!");
-                        break;
+        game.addGameListener(new GameListener() {
+            @Override
+            public void turnTaken(TurnTakenEvent e) {
+                System.out.println(game.toString());
+            }
+
+            @Override
+            public void gameFinished(GameFinishedEvent e) {
+                Piece winner = game.winner();
+                if (winner == null) {
+                    System.out.println("It's a draw!");
+                } else if (winner == Piece.O) {
+                    System.out.println("O wins!!");
+                } else if (winner == Piece.X) {
+                    System.out.println("X wins!!");
                 }
             }
         });
 
-        System.out.println("Game finished after " + turns + " turn(s).");
+        int turns = game.simulate(Piece.O);
+
+        if (game.isFinished()) {
+            System.out.println("Game finished after " + turns + " turn(s).");
+        }
+        else {
+            System.out.println("Simulation ended after " + turns + " turn(s).");
+        }
     }
 
 }

@@ -1,16 +1,19 @@
 package tech.gaul.noughtsncrosses;
 
+import tech.gaul.noughtsncrosses.events.PiecePlacedEvent;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Grid {
 
     private final int size;
 
-    private final Piece[][] board;
+    private final GridCell[] grid;
     private int placedCount;
-
-    private Piece winner;
+    private List<GridListener> listeners = new ArrayList<>();
 
     public Grid() {
         this(3);
@@ -19,21 +22,13 @@ public class Grid {
     public Grid(int size) {
         this.size = size;
 
-        board = new Piece[size][size];
-        for (int r = 0; r < size; r++) {
-            for (int c = 0; c < size; c++) {
-                board[r][c] = Piece.EMPTY;
+        grid = new GridCell[size * size];
+        for (var r = 0; r < size; r++) {
+            for (var c = 0; c < size; c++) {
+                GridCell cell = new GridCell(this, r, c);
+                cell.addPropertyChangeListener(e -> piecePlaced((GridCell)e.getSource()));
+                grid[c + size * r] = cell;
             }
-        }
-    }
-
-    /**
-     * Throw an IndexOutOfBoundsException if the given CellReference does not fall within the bounds of this grid.
-     * @param ref The CellReference to be checked.
-     */
-    private void throwIfInvalidCellReference(CellReference ref) {
-        if (ref.row() < 0 || ref.column() < 0 || ref.row() >= size || ref.column() >= size) {
-            throw new IndexOutOfBoundsException();
         }
     }
 
@@ -46,104 +41,48 @@ public class Grid {
     }
 
     /**
-     * Gets a value that indicates the winner of this game, if the game has finished.
-     * @return The Piece representing the winner if the game has finished, Piece.EMPTY if the game was a draw, or
-     *         null if the game has not yet finished.
+     * Gets the size of the grid.
+     * @return An integer value representing the size of the grid in cells.
      */
-    public Piece getWinner() {
-        return winner;
+    public int size() {
+        return size;
     }
 
     /**
-     * Gets a value that indicates whether the game has finished.
-     * @return true if the game has finished and no more pieces should be played; otherwise, false.
+     * Gets a grid reference representing a location on this grid.
+     * @param row Row number the reference relates to.
+     * @param column Column number the reference relates to.
+     * @return A GridReference instance representing the requested location on this grid.
      */
-    public boolean isFinished() {
-        return winner != null;
+    public GridCell cell(int row, int column) {
+        return grid[column + size * row];
     }
 
     /**
-     * Gets the Piece at a given CellReference.
-     * @param ref The cell reference to examine.
-     * @return The Piece at the given cell reference.
-     * @throws IndexOutOfBoundsException if the given cell reference does not fall within the bounds of this grid.
+     * Gets a list of all locations in the grid.
+     * @return A List containing GridReferences representing every cell in the grid.
      */
-    public Piece get(CellReference ref) {
-        throwIfInvalidCellReference(ref);
-
-        return board[ref.row()][ref.column()];
+    public List<GridCell> cells() {
+        return Arrays.asList(grid);
     }
 
     /**
-     * Puts a piece at a cell reference.
-     * @param ref Cell reference at which piece is to be placed.
-     * @param piece The piece to place.
-     * @return true if the piece was successfully placed, false otherwise.
-     * @throws IndexOutOfBoundsException if the given cell reference does not fall within the bounds of this grid.
-     */
-    public boolean put(CellReference ref, Piece piece) {
-        throwIfInvalidCellReference(ref);
-
-        if (board[ref.row()][ref.column()] != Piece.EMPTY) {
-            return false;
-        }
-
-        board[ref.row()][ref.column()] = piece;
-        if (piece == Piece.O || piece == Piece.X)
-            placedCount++;
-
-        // Check for a win condition.
-        int tRow = 0, tCol = 0, tD1 = 0, tD2 = 0;
-        for (int i = 0; i < 3; i++) {
-            var rowRef = new CellReference(i, ref.column());
-            tRow += get(rowRef) == piece ? 1 : 0;
-
-            var colRef = new CellReference(ref.row(), i);
-            tCol += get(colRef) == piece ? 1 : 0;
-
-            var d1Ref = new CellReference(i, i);
-            tD1 += get(d1Ref) == piece ? 1 : 0;
-
-            var d2Ref = new CellReference(size - 1 - i, i);
-            tD2 += get(d2Ref) == piece ? 1 : 0;
-        }
-
-        if (tRow == size || tCol == size || tD1 == size || tD2 == size)
-            winner = piece;
-        else if (isFull())
-            winner = Piece.EMPTY; // If the board is full, and we have no winner, it's a draw.
-
-        return true;
-    }
-
-    /**
-     * Get a CellReference to a random cell in this grid.
+     * Gets a CellReference to a random cell in this grid.
      * @return A CellReference representing a random cell in this grid.
      */
-    public CellReference getRandomCellReference() {
+    public GridCell getRandomEmptyCell() {
         var random = ThreadLocalRandom.current();
 
-        int row = random.nextInt(size);
-        int col = random.nextInt(size);
+        for (var i = 0; i < 100; i++) {
+            int row = random.nextInt(size);
+            int col = random.nextInt(size);
 
-        return new CellReference(row, col);
-    }
-
-    /**
-     * Puts a piece on the board in a random (empty) location.
-     * @param piece The piece to be placed.
-     * @return true if the piece was successfully placed, false otherwise.
-     */
-    public boolean putRandom(Piece piece) {
-        // Try 100 times...
-        for (int i = 0; i < 100; i++) {
-            var ref = getRandomCellReference();
-            if (put(ref, piece))
-                return true;
+            if (cell(row, col).isEmpty()) {
+                return cell(row, col);
+            }
         }
 
-        // Couldn't do it.
-        return false;
+        return null;
     }
 
     /**
@@ -152,61 +91,65 @@ public class Grid {
     public void fillRandom() {
         int piece = 1;
         while (!isFull()) {
-            putRandom(piece == 1 ? Piece.O :Piece.X);
+            getRandomEmptyCell().setPiece(piece == 1 ? Piece.O :Piece.X);
             piece = 3 - piece;
         }
     }
 
     /**
-     * Play the game until it has finished.
-     * @param firstPiece The piece that goes first (O or X).
-     * @param turnTaken A delegate to be called at the end of each turn.
-     * @return The number of turns taken.
+     * Reset this board, clearing all pieces.
      */
-    public int simulateGame(Piece firstPiece, TurnTaken turnTaken) {
-        if (firstPiece == Piece.EMPTY)
-            return 0;
-
-        int p = firstPiece == Piece.O ? 1 : 2;
-
-        int turn;
-        for (turn = 1; turn <= size * size && !isFinished(); turn++) {
-            Piece piece = p == 1 ? Piece.O : Piece.X;
-            if (putRandom(piece)) {
-                turnTaken.turnTaken(this, turn, piece);
-            }
-            p = 3 - p;
+    public void reset() {
+        placedCount = 0;
+        for (var i = 0; i < size * size; i++) {
+            grid[i].reset();
         }
+    }
 
-        return turn - 1;
+    // Event handling
+    public void addGridListener(GridListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeGridListener(GridListener listener) {
+        listeners.remove(listener);
+    }
+
+    public void firePiecePlacedEvent(PiecePlacedEvent event) {
+        for (var listener : listeners) {
+            listener.piecePlaced(event);
+        }
     }
 
     @Override
     public String toString() {
         var builder = new StringBuilder();
 
-        for (int r = 0; r < size; r++) {
+        for (var i = 0; i < size * size; i++) {
+            builder.append(' ');
+            var piece = grid[i].getPiece();
+            builder.append(piece == null ? " " : piece.toString());
+            builder.append(' ');
 
-            for (int c = 0; c < size; c++) {
-                var ref = new CellReference(r, c);
-                builder.append(' ');
-                builder.append(get(ref));
-                builder.append(' ');
-                if (c < size - 1)
-                    builder.append('|');
-            }
-            builder.append(System.lineSeparator());
+            var lastCol = i % size == size - 1;
+            var lastRow = i == size * size - 1;
+            if (!lastCol) builder.append('|');
 
-            if (r < size - 1) {
-                for (int c = 0; c < size; c++) {
-                    builder.append("---");
-                    if (c < size - 1)
-                        builder.append('+');
-                }
+            if (lastCol) {
                 builder.append(System.lineSeparator());
+                if (!lastRow) {
+                    builder.append("---+".repeat(size - 1)).append("---");
+                    builder.append(System.lineSeparator());
+                }
             }
         }
 
         return builder.toString();
+    }
+
+    private void piecePlaced(GridCell cell) {
+        if (cell.getPiece() == Piece.O || cell.getPiece() == Piece.X) {
+            placedCount++;
+        }
     }
 }
