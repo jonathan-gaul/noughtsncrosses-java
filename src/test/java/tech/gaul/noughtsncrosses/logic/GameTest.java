@@ -1,4 +1,4 @@
-package tech.gaul.noughtsncrosses;
+package tech.gaul.noughtsncrosses.logic;
 
 import org.junit.jupiter.api.Test;
 
@@ -70,5 +70,7 @@ public class GameTest {
 
         return game;
     }
+
+
 
 }

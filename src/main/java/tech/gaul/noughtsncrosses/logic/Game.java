@@ -1,7 +1,7 @@
-package tech.gaul.noughtsncrosses;
+package tech.gaul.noughtsncrosses.logic;
 
-import tech.gaul.noughtsncrosses.events.GameFinishedEvent;
-import tech.gaul.noughtsncrosses.events.TurnTakenEvent;
+import tech.gaul.noughtsncrosses.logic.events.GameFinishedEvent;
+import tech.gaul.noughtsncrosses.logic.events.TurnTakenEvent;
 
 import java.util.ArrayList;
 import java.util.List;

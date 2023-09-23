@@ -1,6 +1,6 @@
-package tech.gaul.noughtsncrosses.events;
+package tech.gaul.noughtsncrosses.logic.events;
 
-import tech.gaul.noughtsncrosses.GridCell;
+import tech.gaul.noughtsncrosses.logic.GridCell;
 
 import java.util.EventObject;
 

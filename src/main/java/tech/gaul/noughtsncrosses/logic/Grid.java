@@ -1,6 +1,6 @@
-package tech.gaul.noughtsncrosses;
+package tech.gaul.noughtsncrosses.logic;
 
-import tech.gaul.noughtsncrosses.events.PiecePlacedEvent;
+import tech.gaul.noughtsncrosses.logic.events.PiecePlacedEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,7 +1,7 @@
-package tech.gaul.noughtsncrosses;
+package tech.gaul.noughtsncrosses.logic;
 
-import tech.gaul.noughtsncrosses.events.GameFinishedEvent;
-import tech.gaul.noughtsncrosses.events.PiecePlacedEvent;
+import tech.gaul.noughtsncrosses.logic.events.GameFinishedEvent;
+import tech.gaul.noughtsncrosses.logic.events.PiecePlacedEvent;
 
 import java.util.EventListener;
 

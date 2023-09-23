@@ -1,4 +1,4 @@
-package tech.gaul.noughtsncrosses;
+package tech.gaul.noughtsncrosses.logic;
 
 public enum Piece {
     O,

@@ -1,4 +1,4 @@
-package tech.gaul.noughtsncrosses;
+package tech.gaul.noughtsncrosses.logic;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
