@@ -11,6 +11,7 @@ public class Game {
     private final Grid grid;
     private int turn = 1;
     private Piece winner;
+    private Piece currentPiece;
 
     private final List<GameListener> listeners = new ArrayList<>();
 
@@ -23,6 +24,7 @@ public class Game {
         for (var cell : grid.cells()) {
             cell.addPropertyChangeListener(e -> piecePlaced((GridCell)e.getSource()));
         }
+        currentPiece = Piece.X;
     }
 
     /**
@@ -51,6 +53,23 @@ public class Game {
     }
 
     /**
+     * Gets a value that indicates the current player.
+     * @return A Piece that indicates the current player.
+     */
+    public Piece getCurrentPiece() {
+        return currentPiece;
+    }
+
+    /**
+     * Sets a value that indicates the current player.
+     * @param piece A Piece that indicates the current player.
+     */
+    public void setCurrentPiece(Piece piece) {
+        if (piece == null) throw new IllegalArgumentException();
+        currentPiece = piece;
+    }
+
+    /**
      * Play the game until it has finished.
      * @param firstPiece The piece that goes first (O or X).
      * @return The number of turns taken.
@@ -60,39 +79,34 @@ public class Game {
             return 0;
 
         reset();
+        setCurrentPiece(firstPiece);
 
         int p = firstPiece == Piece.O ? 1 : 2;
 
         while (!isFinished()) {
-            Piece piece = p == 1 ? Piece.O : Piece.X;
-
-            GridCell ref = grid.getRandomEmptyCell();
-            if (ref == null || !ref.setPiece(piece)) break; // We couldn't place the piece for some reason.
-
-            updateWinCondition(ref);
-
-            p = 3 - p;
+            GridCell ref = putRandom();
+            if (ref == null) break; // We couldn't place the piece for some reason.
         }
 
         return turn - 1;
     }
 
     private void piecePlaced(GridCell cell) {
-        updateWinCondition(cell);
         fireTurnTaken(new TurnTakenEvent(this, cell));
+        updateWinCondition(cell);
         turn++;
+        currentPiece = currentPiece == Piece.O ? Piece.X : Piece.O;
     }
 
     /**
-     * Puts a piece on the board in a random (empty) location.
-     * @param piece The piece to be placed.
+     * Puts a piece on the board for the current player in a random (empty) location.
      * @return A GridReference representing the location the Piece was placed if successful; otherwise, null.
      */
-    public GridCell putRandom(Piece piece) {
+    public GridCell putRandom() {
         // Try 100 times...
         for (int i = 0; i < 100; i++) {
             var cell = grid.getRandomEmptyCell();
-            if (cell.setPiece(piece))
+            if (cell.setPiece(currentPiece))
                 return cell;
         }
 
@@ -148,6 +162,7 @@ public class Game {
         grid.reset();
         winner = null;
         turn = 1;
+        currentPiece = Piece.X;
     }
 
     public Grid grid() {

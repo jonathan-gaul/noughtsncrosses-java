@@ -1,20 +1,19 @@
 package tech.gaul.noughtsncrosses.web.api.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.annotation.ApplicationScope;
 import tech.gaul.noughtsncrosses.logic.Game;
 
 import java.nio.ByteBuffer;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
+@ApplicationScope
 public class GameServiceImpl implements GameService {
 
     private static final Base64.Encoder BASE64_URL_ENCODER = Base64.getUrlEncoder().withoutPadding();
 
-    private Map<String, Game> games = new HashMap<>();
+    private static final Map<String, Game> games = new HashMap<>();
 
     /**
      * Get a game by its key.
@@ -43,6 +42,10 @@ public class GameServiceImpl implements GameService {
 
         games.put(key, game);
         return key;
+    }
+
+    public Set<String> keys() {
+        return games.keySet();
     }
 
 }

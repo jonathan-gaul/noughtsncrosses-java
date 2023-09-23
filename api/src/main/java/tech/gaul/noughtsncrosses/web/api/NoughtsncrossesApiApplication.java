@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class NoughtsncrossesApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NoughtsncrossesApiApplication.class, args);
+		SpringApplication.
+				run(NoughtsncrossesApiApplication.class, args);
 	}
 
 }
