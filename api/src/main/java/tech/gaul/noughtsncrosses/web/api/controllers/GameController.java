@@ -12,6 +12,7 @@ import tech.gaul.noughtsncrosses.web.api.services.GameService;
 
 import java.util.Set;
 
+@CrossOrigin(origins = "*")
 @RestController
 public class GameController {
 

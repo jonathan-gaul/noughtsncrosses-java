@@ -9,6 +9,10 @@ public class GameDTO {
     public int Turn;
     public int GridSize;
     public String[] Grid;
+    public String Winner;
+    public boolean IsFinished;
+
+    public String CurrentPiece;
 
     public GameDTO(String key, Game game) {
         Key = key;
@@ -20,6 +24,10 @@ public class GameDTO {
                 .map(c -> c.getPiece() == null ? " " :
                           c.getPiece() == Piece.X ? "X" : "O")
                 .toArray(String[]::new);
+
+        IsFinished = game.isFinished();
+        Winner = game.winner() == null ? null : game.winner().toString();
+        CurrentPiece = game.getCurrentPiece().toString();
     }
 
 }
