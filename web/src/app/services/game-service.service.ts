@@ -28,7 +28,11 @@ export class GameService {
    * @returns A Game representing the new game.
    */
   public create(): Observable<Game> {
-    return this.http.post<Game>(this.gamesUrl, {}).pipe(first(), shareReplay());
+    this.http.post<Game>(this.gamesUrl, {})
+      .pipe(first())
+      .subscribe(g => this.gameSubject?.next(g));
+
+    return this.gameSubject.asObservable();
   }
 
   /**

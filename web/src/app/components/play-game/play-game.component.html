@@ -26,4 +26,7 @@
     Game Key:
     <span>{{key}}</span>
   </div>
+  <div *ngIf="game.IsFinished">
+    <button (click)="start()">New Game</button>
+  </div>
 </div>

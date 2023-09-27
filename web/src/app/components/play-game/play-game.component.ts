@@ -2,7 +2,7 @@ import { Component, OnInit, } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Game } from 'src/app/models/game';
 import { GameService } from 'src/app/services/game-service.service';
-import { Observable, of, Subject, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { Location } from '@angular/common';
 
 @Component({
@@ -15,6 +15,7 @@ export class PlayGameComponent implements OnInit {
   key?: string;
   piece?: string;
 
+  gameSubscription?: Subscription;
   game$?: Observable<Game>;
   rows$?: Observable<number[]>;
   cols$?: Observable<number[]>;
@@ -34,14 +35,16 @@ export class PlayGameComponent implements OnInit {
   play(r: number, c: number) {
     if (this.key !== undefined && this.piece !== undefined) {
       this.gameService.play(this.key, r, c, this.piece);
-      // this.game$.subscribe(x => {
-      //   this.rows$ = of(Array.from(Array(x.GridSize), (_,i) => i));
-      //     this.cols$ = of(Array.from(Array(x.GridSize), (_,i) => i));
-      //     this.piece = x.CurrentPiece;
-      // });
     }
   }
 
+
+  /**
+   * Start a new game.
+   */
+  start() {
+    return this.gameService.create();
+  }
 
   ngOnInit() {
     this.route.queryParamMap.subscribe(params => {
@@ -52,26 +55,24 @@ export class PlayGameComponent implements OnInit {
       const piece = params.get('piece');
 
       if (key === null) {
-
-        this.gameService.create().subscribe(x => {
-          this.router.navigateByUrl('/play?key=' + x.Key);
-        })
+        this.game$ = this.start();
       }
       else {
-        this.key = key;
-        this.piece = piece ?? "X";
         this.game$ = this.gameService.get(key);
-        this.game$.subscribe(x => {
-          this.rows$ = of(Array.from(Array(x.GridSize), (_,i) => i));
-          this.cols$ = of(Array.from(Array(x.GridSize), (_,i) => i));
-          this.piece = x.CurrentPiece;
-        });
-    }
+      }
+
+      this.gameSubscription = this.game$.subscribe(x => {
+        this.key = x.Key;
+        this.rows$ = of(Array.from(Array(x.GridSize), (_,i) => i));
+        this.cols$ = of(Array.from(Array(x.GridSize), (_,i) => i));
+        this.piece = x.CurrentPiece;
+        this.location.replaceState('/play', 'key=' + this.key);
+      });
     });
   }
 
   ngOnDestroy() {
-    // this.gameSubscription?.unsubscribe();
+    this.gameSubscription?.unsubscribe();
   }
 
 }
