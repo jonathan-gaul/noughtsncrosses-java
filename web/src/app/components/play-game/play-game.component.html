@@ -1,0 +1,29 @@
+
+<div *ngIf="game$ | async as game">
+  <h3 *ngIf="!game.IsFinished">Turn {{game.Turn}} -- {{game.CurrentPiece}}'s turn</h3>
+  <h3 *ngIf="game.IsFinished">
+    <span *ngIf="game.Winner">
+      {{game.Winner}} wins
+    </span>
+    <span *ngIf="!game.Winner">
+      Game drawn
+    </span>
+    on Turn {{game.Turn - 1}}!
+  </h3>
+  <table>
+    <tr *ngFor="let r of (rows$ | async)">
+      <td *ngFor="let c of (cols$ | async)">
+        <div *ngIf="!game.IsFinished && game.Grid[c + game.GridSize * r] == ' '" class="selectable" (click)="play(r, c)">
+          <div class="{{game.Grid[c + game.GridSize * r]}}">{{game.Grid[c + game.GridSize * r]}}</div>
+        </div>
+        <div *ngIf="game.IsFinished || game.Grid[c + game.GridSize * r] != ' '">
+          <div class="{{game.Grid[c + game.GridSize * r]}}">{{game.Grid[c + game.GridSize * r]}}</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div class="key">
+    Game Key:
+    <span>{{key}}</span>
+  </div>
+</div>
