@@ -1,7 +1,7 @@
 
 <div *ngIf="game$ | async as game">
-  <h3 *ngIf="!game.IsFinished">Turn {{game.Turn}} -- {{game.CurrentPiece}}'s turn</h3>
-  <h3 *ngIf="game.IsFinished">
+  <h2 *ngIf="!game.IsFinished">Turn {{game.Turn}} -- {{game.CurrentPiece}}'s turn</h2>
+  <h2 *ngIf="game.IsFinished">
     <span *ngIf="game.Winner">
       {{game.Winner}} wins
     </span>
@@ -9,7 +9,7 @@
       Game drawn
     </span>
     on Turn {{game.Turn - 1}}!
-  </h3>
+  </h2>
   <table>
     <tr *ngFor="let r of (rows$ | async)">
       <td *ngFor="let c of (cols$ | async)">

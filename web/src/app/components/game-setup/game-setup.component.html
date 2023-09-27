@@ -1,9 +1,11 @@
 
-<div class="card my-5">
-  <div class="card-body">
-    <button>Start New Game</button>
-    <p>or</p>
-    <input type="text" class="form-control" id="key" name="key" placeholder="Enter Game Key" required />
-    <button>Join Existing Game</button>
+<div>
+  <div>
+    <form ngNoForm name="setupGame" action="/play" method="get">
+      <button type="submit">Start New Game</button>
+      <p>or</p>
+      <input type="text" class="form-control" id="key" name="key" placeholder="Enter Game Key" />
+      <button type="submit">Join Existing Game</button>
+    </form>
   </div>
 </div>

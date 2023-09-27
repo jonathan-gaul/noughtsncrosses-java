@@ -54,7 +54,7 @@ export class PlayGameComponent implements OnInit {
       const key = params.get('key');
       const piece = params.get('piece');
 
-      if (key === null) {
+      if (key === null || key == '') {
         this.game$ = this.start();
       }
       else {
