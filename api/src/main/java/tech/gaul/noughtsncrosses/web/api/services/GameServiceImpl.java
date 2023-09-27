@@ -1,8 +1,10 @@
 package tech.gaul.noughtsncrosses.web.api.services;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.ApplicationScope;
 import tech.gaul.noughtsncrosses.logic.Game;
+import tech.gaul.noughtsncrosses.web.api.dto.GameDTO;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -11,9 +13,15 @@ import java.util.*;
 @ApplicationScope
 public class GameServiceImpl implements GameService {
 
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
     private static final Base64.Encoder BASE64_URL_ENCODER = Base64.getUrlEncoder().withoutPadding();
 
     private static final Map<String, Game> games = new HashMap<>();
+
+    public GameServiceImpl(SimpMessagingTemplate simpMessagingTemplate) {
+        this.simpMessagingTemplate = simpMessagingTemplate;
+    }
 
     /**
      * Get a game by its key.
@@ -46,6 +54,10 @@ public class GameServiceImpl implements GameService {
 
     public Set<String> keys() {
         return games.keySet();
+    }
+
+    public void sendGameUpdate(GameDTO game) {
+        this.simpMessagingTemplate.convertAndSend("/game/changes/" + game.Key, game);
     }
 
 }
