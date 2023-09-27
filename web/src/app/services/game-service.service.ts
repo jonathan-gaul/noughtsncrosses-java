@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Game } from '../models/game';
 import { Play } from '../models/play';
 import { Observable, first, shareReplay, ReplaySubject, Subscription } from 'rxjs';
+import { StompService } from './stomp-service.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,23 +15,39 @@ export class GameService {
 
   private gamesUrl: string;
 
-  private endpointUrl(name: string): string {
+  private endpointUrl(name?: string): string {
     return `${this.gamesUrl}/${name}`;
   }
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private stompService: StompService) {
     this.gamesUrl = 'http://localhost:8080/games';
     this.gameSubject = new ReplaySubject(1);
+  }
+
+  /**
+   * Watch a game for changes.
+   * @param key The game's key.
+   */
+  private watch(key: string) {
+    this.stompService.watch('/games/changes/' + key)
+      .subscribe(m => {
+        this.gameSubject?.next(JSON.parse(m.body));
+      });
   }
 
   /**
    * Create a new playable game.
    * @returns A Game representing the new game.
    */
-  public create(): Observable<Game> {
-    this.http.post<Game>(this.gamesUrl, {})
+  public create(key?: string): Observable<Game> {
+    this.http.post<Game>(this.endpointUrl(key), {})
       .pipe(first())
-      .subscribe(g => this.gameSubject?.next(g));
+      .subscribe(g => {
+        // Publish the updated game.
+        this.gameSubject?.next(g);
+        // Also subscribe for updates to the game.
+        this.watch(g.Key);
+      });
 
     return this.gameSubject.asObservable();
   }
@@ -44,7 +61,11 @@ export class GameService {
     if (refresh || !this.gameObservable) {
       this.http.get<Game>(this.endpointUrl(key))
         .pipe(first())
-        .subscribe(g => this.gameSubject?.next(g));
+        .subscribe(g => {
+          this.gameSubject?.next(g);
+          // Connect to WebSocket to get changes.
+          this.watch(g.Key);
+        });
     }
 
     return this.gameSubject.asObservable();
@@ -59,9 +80,13 @@ export class GameService {
    * @returns The updated Game.
    */
   public play(key: string, r: number, c: number, piece: string): Observable<Game> {
+    console.log('play request');
     this.http.put<Game>(this.endpointUrl(key), new Play(r, c, piece))
       .pipe(first())
-      .subscribe(g => this.gameSubject?.next(g));
+      .subscribe(g => {
+        console.log('play response');
+        this.gameSubject?.next(g);
+      });
 
     return this.gameSubject.asObservable();
   }

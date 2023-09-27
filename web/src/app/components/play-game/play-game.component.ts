@@ -34,7 +34,7 @@ export class PlayGameComponent implements OnInit {
    */
   play(r: number, c: number) {
     if (this.key !== undefined && this.piece !== undefined) {
-      this.gameService.play(this.key, r, c, this.piece);
+      this.game$ = this.gameService.play(this.key, r, c, this.piece);
     }
   }
 
@@ -43,7 +43,7 @@ export class PlayGameComponent implements OnInit {
    * Start a new game.
    */
   start() {
-    return this.gameService.create();
+    return this.gameService.create(this.key);
   }
 
   ngOnInit() {
@@ -62,17 +62,32 @@ export class PlayGameComponent implements OnInit {
       }
 
       this.gameSubscription = this.game$.subscribe(x => {
-        this.key = x.Key;
-        this.rows$ = of(Array.from(Array(x.GridSize), (_,i) => i));
-        this.cols$ = of(Array.from(Array(x.GridSize), (_,i) => i));
-        this.piece = x.CurrentPiece;
-        this.location.replaceState('/play', 'key=' + this.key);
+        console.log("GAME update");
+        console.log(x);
+
+        if (this.key !== '' && this.key !== undefined && this.key != x.Key) {
+          // If the new game has a different key, someone has triggered a new game...
+          // For now we'll just navigate to the new URL to resubscribe etc.
+          console.log('RELOADING...');
+          this.router.navigateByUrl('/play?key=' + x.Key);
+          // TODO: Fix this (we'll need to unsubscribe from the existing game etc).
+          window.location.reload();
+        }
+        else {
+          this.key = x.Key;
+          if (!this.rows$) {
+            this.rows$ = of(Array.from(Array(x.GridSize), (_,i) => i));
+            this.cols$ = of(Array.from(Array(x.GridSize), (_,i) => i));
+          }
+          this.piece = x.CurrentPiece;
+          this.location.replaceState('/play', 'key=' + x.Key);
+        }
       });
     });
   }
 
   ngOnDestroy() {
-    this.gameSubscription?.unsubscribe();
+    // this.gameSubscription?.unsubscribe();
   }
 
 }
