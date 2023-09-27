@@ -24,11 +24,19 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PostMapping("/games")
-    public GameDTO create() {
+    @PostMapping("/games/{key}")
+    public GameDTO create(@PathVariable(required = false, name = "key") String key) {
+
         // Create a new game.
-        var key = gameService.createGame();
-        return new GameDTO(key, gameService.get(key));
+        var newKey = gameService.createGame();
+        var newGame = new GameDTO(newKey, gameService.get(newKey));
+
+        // If we have an existing key, tell everyone subscribed to the existing key that we're switching to a new game.
+        if (key != null) {
+            gameService.sendGameUpdate(key, newGame);
+        }
+
+        return newGame;
     }
 
     @GetMapping("/games")
@@ -63,7 +71,8 @@ public class GameController {
         if (!game.grid().cell(play.Row, play.Column).setPiece(piece))
             return new ResponseEntity<>(dto, HttpStatus.BAD_REQUEST);
 
-        gameService.sendGameUpdate(dto);
+        dto = new GameDTO(key, game); // Must update DTO as we've played a piece...
+        gameService.sendGameUpdate(dto.Key, dto);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

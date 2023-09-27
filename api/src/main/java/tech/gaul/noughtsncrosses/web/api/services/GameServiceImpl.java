@@ -56,8 +56,8 @@ public class GameServiceImpl implements GameService {
         return games.keySet();
     }
 
-    public void sendGameUpdate(GameDTO game) {
-        this.simpMessagingTemplate.convertAndSend("/game/changes/" + game.Key, game);
+    public void sendGameUpdate(String key, GameDTO game) {
+        this.simpMessagingTemplate.convertAndSend("/games/changes/" + key, game);
     }
 
 }

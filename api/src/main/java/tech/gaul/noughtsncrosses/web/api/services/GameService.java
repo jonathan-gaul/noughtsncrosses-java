@@ -27,6 +27,8 @@ public interface GameService {
 
     /**
      * Send a game update to WebSocket subscribers.
+     * @param key The key to send the game to (can be different from the game key).
+     * @param game The game to send.
      */
-    void sendGameUpdate(GameDTO game);
+    void sendGameUpdate(String key, GameDTO game);
 }
