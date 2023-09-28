@@ -9,7 +9,7 @@ export class StompService extends RxStomp {
   constructor() {
     super();
     this.configure({
-      brokerURL: 'ws://localhost:8080/websocket',
+      brokerURL: 'wss://./api/websocket',
 
       connectHeaders: { },
 

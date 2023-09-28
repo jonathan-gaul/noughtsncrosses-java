@@ -20,7 +20,7 @@ export class GameService {
   }
 
   constructor(private http: HttpClient, private stompService: StompService) {
-    this.gamesUrl = 'http://localhost:8080/games';
+    this.gamesUrl = '/api/games';
     this.gameSubject = new ReplaySubject(1);
   }
 
