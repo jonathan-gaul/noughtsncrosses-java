@@ -141,7 +141,7 @@ public class Game {
                 tD1 += grid.cell(i, i).getPiece() == piece ? 1 : 0;
 
                 // Check the top-right to bottom-left diagonal.
-                tD2 += grid.cell(i, i).getPiece() == piece ? 1 : 0;
+                tD2 += grid.cell(i, 2 - i).getPiece() == piece ? 1 : 0;
             }
         }
 
