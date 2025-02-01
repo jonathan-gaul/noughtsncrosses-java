@@ -9,7 +9,7 @@ export class StompService extends RxStomp {
   constructor() {
     super();
     this.configure({
-      brokerURL: 'wss://' + window.location.host + '/api/websocket',
+      brokerURL: 'ws://' + window.location.host + '/api/websocket', // Change to ws:// for testing
 
       connectHeaders: { },
 
@@ -22,6 +22,16 @@ export class StompService extends RxStomp {
         console.log(new Date(), msg);
       }
     });
+
     this.activate();
+
+    // Add error handling
+    this.stompClient.onWebSocketError = (error) => {
+      console.error('WebSocket error: ', error);
+    };
+
+    this.stompClient.onStompError = (frame) => {
+      console.error('STOMP error: ', frame);
+    };
   }
 }

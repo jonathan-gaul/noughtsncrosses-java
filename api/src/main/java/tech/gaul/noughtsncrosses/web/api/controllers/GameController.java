@@ -1,6 +1,5 @@
 package tech.gaul.noughtsncrosses.web.api.controllers;
 
-import jakarta.websocket.server.PathParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import java.util.Set;
 
 @CrossOrigin(origins = "*")
 @RestController
+@RequestMapping("/api")
 public class GameController {
 
     private final GameService gameService;
